@@ -11,15 +11,17 @@ from traitlets import Unicode
 class RemoteUserLoginHandler(BaseHandler):
 
     def get(self):
-        header_name = self.authenticator.header_name
-        remote_user = self.request.headers.get(header_name, "")
+        """
+        Get the username as URL argument and setting cookie based on the username.
+        This can be modified according to the user requirement.
+        """
+        remote_user = self.get_argument('user', None, True)
         if remote_user == "":
             raise web.HTTPError(401)
-
-        user = self.user_from_username(remote_user)
-        self.set_login_cookie(user)
-        next_url = self.get_next_url(user)
-        self.redirect(next_url)
+        else:
+            user = self.user_from_username(remote_user)
+            self.set_login_cookie(user)
+            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserAuthenticator(Authenticator):
